@@ -91,4 +91,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-console.log("SERVER DB URI:", process.env.MONGODB_URI);
+
