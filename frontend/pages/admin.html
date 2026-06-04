@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – ScholarConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-page   { margin-top:70px; display:grid; grid-template-columns:240px 1fr; min-height:calc(100vh - 70px); }
+    .admin-sidebar{ background:var(--primary-dark); padding:1.5rem 0; color:#fff; }
+    .admin-sidebar .admin-logo { padding:0 1.5rem 1.5rem; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:1rem; }
+    .admin-sidebar .admin-logo span { font-size:.75rem; color:rgba(255,255,255,.5); display:block; margin-top:.2rem; }
+    .admin-nav a  { display:flex; align-items:center; gap:.75rem; padding:.8rem 1.5rem; color:rgba(255,255,255,.7); font-size:.875rem; font-weight:500; transition:var(--transition); border-left:3px solid transparent; text-decoration:none; }
+    .admin-nav a:hover,.admin-nav a.active { background:rgba(255,255,255,.1); color:#fff; border-left-color:var(--accent); }
+    .admin-nav .nav-section { padding:.75rem 1.5rem .3rem; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); }
+    .admin-main   { background:var(--bg); padding:2rem; overflow-y:auto; }
+    .admin-panel  { display:none; }
+    .admin-panel.active { display:block; }
+
+    /* Stats Row */
+    .admin-stats  { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:2rem; }
+    .admin-stat   { background:var(--bg-card); border-radius:var(--radius); padding:1.5rem; border:1px solid var(--border-light); display:flex; align-items:center; gap:1rem; box-shadow:var(--shadow-sm); }
+    .admin-stat .a-icon { width:48px; height:48px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .admin-stat .a-val  { font-size:1.8rem; font-weight:700; line-height:1; color:var(--text-primary); }
+    .admin-stat .a-lbl  { font-size:.75rem; color:var(--text-muted); margin-top:.2rem; }
+
+    /* Table */
+    .admin-table-wrap { background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border-light); overflow:hidden; box-shadow:var(--shadow-sm); }
+    .admin-table-header { padding:1.25rem 1.5rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-light); flex-wrap:wrap; gap:1rem; }
+    .admin-table-header h3 { font-size:1rem; }
+    table { width:100%; border-collapse:collapse; }
+    th    { background:var(--bg); padding:.75rem 1rem; text-align:left; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); border-bottom:1px solid var(--border-light); white-space:nowrap; }
+    td    { padding:.85rem 1rem; font-size:.875rem; color:var(--text-primary); border-bottom:1px solid var(--border-light); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--bg); }
+    .td-name { font-weight:600; max-width:200px; }
+    .td-name span { display:block; font-size:.75rem; color:var(--text-muted); font-weight:400; margin-top:.1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .action-btns { display:flex; gap:.4rem; }
+
+    /* Modal Overlay */
+    .sc-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); z-index:6000; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity .3s; }
+    .sc-modal-overlay.open { opacity:1; pointer-events:all; }
+    .sc-modal { background:var(--bg-white); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:720px; max-height:90vh; overflow-y:auto; transform:scale(.95); transition:transform .3s; box-shadow:0 24px 80px rgba(0,0,0,.25); }
+    .sc-modal-overlay.open .sc-modal { transform:scale(1); }
+    .modal-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .modal-form-grid .full { grid-column:1/-1; }
+
+    /* Confirm Dialog */
+    .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:7000; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity .3s; }
+    .confirm-overlay.open { opacity:1; pointer-events:all; }
+    .confirm-box { background:var(--bg-white); border-radius:var(--radius); padding:2rem; max-width:400px; width:100%; text-align:center; box-shadow:0 24px 80px rgba(0,0,0,.25); }
+
+    /* Search bar in tables */
+    .table-search { display:flex; gap:.75rem; flex-wrap:wrap; }
+    .table-search input { padding:.5rem .9rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:.875rem; background:var(--bg-white); color:var(--text-primary); outline:none; }
+    .table-search input:focus { border-color:var(--primary); }
+
+    /* Category checkboxes */
+    .cat-checks { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .cat-check-label { display:flex; align-items:center; gap:.35rem; font-size:.82rem; cursor:pointer; background:var(--bg); border:1.5px solid var(--border); border-radius:100px; padding:.3rem .8rem; transition:var(--transition); }
+    .cat-check-label input { display:none; }
+    .cat-check-label.checked { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    /* Pending badge */
+    .pending-dot { width:8px; height:8px; background:var(--danger); border-radius:50%; display:inline-block; margin-left:.4rem; }
+
+    @media(max-width:900px){ .admin-page{grid-template-columns:1fr;} .admin-sidebar{display:none;} .admin-stats{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:500px){ .admin-stats{grid-template-columns:1fr;} .modal-form-grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<div id="page-loader" class="page-loader"><div class="loader-spinner"></div></div>
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-logo">
+        <div class="logo-icon">⚙️</div>
+        <div class="logo-text"><div class="logo-title">Admin Panel</div><div class="logo-sub">ScholarConnect</div></div>
+      </a>
+      <div style="flex:1"></div>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="/" class="btn btn-outline btn-sm">🌐 View Site</a>
+        <button onclick="logout()" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger)">🚪 Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-page">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <div style="font-weight:700;color:#fff;font-size:.95rem">🎓 ScholarConnect</div>
+      <span id="admin-name-sidebar">Admin</span>
+    </div>
+    <nav class="admin-nav">
+      <div class="nav-section">Main</div>
+      <a href="#" onclick="showAdminPanel('dashboard',this)" class="active">📊 Dashboard</a>
+      <div class="nav-section">Content</div>
+      <a href="#" onclick="showAdminPanel('scholarships',this)">🎓 Scholarships</a>
+      <a href="#" onclick="showAdminPanel('pending',this)">⏳ Pending Approval <span class="pending-dot" id="pending-dot" style="display:none"></span></a>
+      <a href="#" onclick="showAdminPanel('notifications',this)">🔔 Notifications</a>
+      <div class="nav-section">Users</div>
+      <a href="#" onclick="showAdminPanel('users',this)">👥 Manage Users</a>
+      <a href="#" onclick="showAdminPanel('contacts',this)">📩 Contact Messages</a>
+      <div class="nav-section">Account</div>
+      <a href="/" >🌐 View Website</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+
+    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <div id="panel-dashboard" class="admin-panel active">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem">
+        <div>
+          <h2 style="margin-bottom:.25rem">Dashboard Overview</h2>
+          <p style="font-size:.875rem;color:var(--text-muted)" id="dash-date"></p>
+        </div>
+        <button class="btn btn-primary" onclick="showAdminPanel('scholarships'); openScholarshipModal()">+ Add Scholarship</button>
+      </div>
+
+      <div class="admin-stats" id="admin-stats">
+        <div class="skeleton" style="height:90px;border-radius:var(--radius)"></div>
+        <div class="skeleton" style="height:90px;border-radius:var(--radius)"></div>
+        <div class="skeleton" style="height:90px;border-radius:var(--radius)"></div>
+        <div class="skeleton" style="height:90px;border-radius:var(--radius)"></div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem">
+        <div class="admin-table-wrap" style="padding:1.5rem">
+          <h4 style="margin-bottom:1rem">⚡ Quick Actions</h4>
+          <div style="display:flex;flex-direction:column;gap:.6rem">
+            <button class="btn btn-primary" onclick="showAdminPanel('scholarships',null);setTimeout(openScholarshipModal,100)" style="justify-content:flex-start">➕ Add New Scholarship</button>
+            <button class="btn btn-outline" onclick="showAdminPanel('pending',null)" style="justify-content:flex-start">⏳ Review Pending</button>
+            <button class="btn btn-outline" onclick="showAdminPanel('notifications',null)" style="justify-content:flex-start">🔔 Post Notification</button>
+            <button class="btn btn-outline" onclick="showAdminPanel('contacts',null)" style="justify-content:flex-start">📩 View Messages</button>
+          </div>
+        </div>
+        <div class="admin-table-wrap" style="padding:1.5rem;grid-column:span 2">
+          <h4 style="margin-bottom:1rem">🏆 Top Scholarships by Views</h4>
+          <div id="top-scholarships"><div class="skeleton" style="height:150px;border-radius:var(--radius-sm)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ SCHOLARSHIPS ══════════════ -->
+    <div id="panel-scholarships" class="admin-panel">
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <h3>🎓 All Scholarships</h3>
+          <div class="table-search">
+            <input type="text" id="sch-search" placeholder="Search…" oninput="filterScholarshipTable()">
+            <button class="btn btn-primary btn-sm" onclick="openScholarshipModal()">+ Add New</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="sch-table">
+            <thead>
+              <tr>
+                <th>Scholarship Name</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sch-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ PENDING APPROVAL ══════════════ -->
+    <div id="panel-pending" class="admin-panel">
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <h3>⏳ Pending Approval</h3>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Category</th><th>Amount</th><th>Deadline</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="pending-tbody">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ NOTIFICATIONS ══════════════ -->
+    <div id="panel-notifications" class="admin-panel">
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:1.5rem;align-items:start">
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>🔔 All Notifications</h3></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Title</th><th>Type</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead>
+              <tbody id="notif-tbody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="admin-table-wrap" style="padding:1.5rem;position:sticky;top:90px">
+          <h4 style="margin-bottom:1.25rem">➕ Post Notification</h4>
+          <div class="form-group"><label>Title *</label><input type="text" id="n-title" class="form-control" placeholder="Notification title"></div>
+          <div class="form-group"><label>Message *</label><textarea id="n-message" class="form-control" rows="3" placeholder="Notification message…"></textarea></div>
+          <div class="form-group"><label>Type</label>
+            <select id="n-type" class="form-control">
+              <option value="announcement">📢 Announcement</option>
+              <option value="new_scholarship">🆕 New Scholarship</option>
+              <option value="deadline">⚠️ Deadline Alert</option>
+              <option value="update">🔄 Update</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Priority</label>
+            <select id="n-priority" class="form-control">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">🔴 Urgent</option>
+            </select>
+          </div>
+          <button class="btn btn-primary w-full" onclick="postNotification()" style="justify-content:center">Post Notification</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ USERS ══════════════ -->
+    <div id="panel-users" class="admin-panel">
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <h3>👥 Registered Students</h3>
+          <input type="text" placeholder="Search users…" class="form-control" style="width:220px;padding:.5rem .9rem" oninput="filterUsers(this.value)">
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Category</th><th>Class</th><th>State</th><th>Joined</th><th>Status</th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ CONTACTS ══════════════ -->
+    <div id="panel-contacts" class="admin-panel">
+      <div class="admin-table-wrap">
+        <div class="admin-table-header"><h3>📩 Contact Messages</h3></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="contacts-tbody"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════ SCHOLARSHIP MODAL (Add / Edit) ══════════════ -->
+<div class="sc-modal-overlay" id="sch-modal">
+  <div class="sc-modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add New Scholarship</h3>
+      <button class="modal-close" onclick="closeScholarshipModal()">✕</button>
+    </div>
+
+    <div class="modal-form-grid">
+      <div class="form-group full">
+        <label>Scholarship Name *</label>
+        <input type="text" id="m-name" class="form-control" placeholder="Full scholarship name">
+      </div>
+      <div class="form-group full">
+        <label>Category * (select all that apply)</label>
+        <div class="cat-checks" id="m-categories">
+          <label class="cat-check-label"><input type="checkbox" value="SC"> SC</label>
+          <label class="cat-check-label"><input type="checkbox" value="ST"> ST</label>
+          <label class="cat-check-label"><input type="checkbox" value="BC"> BC</label>
+          <label class="cat-check-label"><input type="checkbox" value="OBC"> OBC</label>
+          <label class="cat-check-label"><input type="checkbox" value="Minority"> Minority</label>
+          <label class="cat-check-label"><input type="checkbox" value="EWS"> EWS</label>
+          <label class="cat-check-label"><input type="checkbox" value="Merit"> Merit</label>
+          <label class="cat-check-label"><input type="checkbox" value="Girls"> Girls</label>
+          <label class="cat-check-label"><input type="checkbox" value="General"> General</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Gender Eligibility *</label>
+        <select id="m-gender" class="form-control">
+          <option value="All">All</option>
+          <option value="Male">Male Only</option>
+          <option value="Female">Female Only</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹ per year) *</label>
+        <input type="number" id="m-amount" class="form-control" placeholder="e.g. 12000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Min Class</label>
+        <select id="m-minclass" class="form-control">
+          <option value="1">Class 1</option><option value="6">Class 6</option>
+          <option value="8">Class 8</option><option value="9">Class 9</option>
+          <option value="10">Class 10</option><option value="11">Class 11</option>
+          <option value="12">Class 12</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Max Class</label>
+        <select id="m-maxclass" class="form-control">
+          <option value="8">Class 8</option><option value="9">Class 9</option>
+          <option value="10">Class 10</option><option value="11">Class 11</option>
+          <option value="12" selected>Class 12</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Income Limit (₹/year)</label>
+        <input type="number" id="m-income" class="form-control" placeholder="e.g. 250000">
+      </div>
+      <div class="form-group">
+        <label>Min. Percentage (%)</label>
+        <input type="number" id="m-percentage" class="form-control" placeholder="e.g. 50" min="0" max="100">
+      </div>
+      <div class="form-group">
+        <label>Deadline *</label>
+        <input type="date" id="m-deadline" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>State</label>
+        <select id="m-state" class="form-control">
+          <option value="All India">All India</option>
+          <option>Andhra Pradesh</option><option>Telangana</option><option>Tamil Nadu</option>
+          <option>Karnataka</option><option>Maharashtra</option><option>Kerala</option>
+          <option>Gujarat</option><option>Rajasthan</option><option>Uttar Pradesh</option>
+          <option>Bihar</option><option>West Bengal</option><option>Delhi</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Official Website URL</label>
+        <input type="url" id="m-link" class="form-control" placeholder="https://scholarships.gov.in">
+      </div>
+      <div class="form-group full">
+        <label>Eligibility Criteria *</label>
+        <textarea id="m-eligibility" class="form-control" rows="2" placeholder="Short eligibility description…"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Description *</label>
+        <textarea id="m-description" class="form-control" rows="3" placeholder="Full scholarship description…"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Benefits</label>
+        <textarea id="m-benefits" class="form-control" rows="2" placeholder="What students receive…"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Application Process</label>
+        <textarea id="m-process" class="form-control" rows="3" placeholder="Step-by-step process (one step per line)…"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Required Documents (comma-separated)</label>
+        <input type="text" id="m-docs" class="form-control" placeholder="Aadhaar Card, Income Certificate, Caste Certificate…">
+      </div>
+      <div class="form-group">
+        <label>Featured?</label>
+        <select id="m-featured" class="form-control">
+          <option value="false">No</option>
+          <option value="true">Yes – Show on Homepage</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Auto-Approve?</label>
+        <select id="m-approve" class="form-control">
+          <option value="true">Yes – Publish immediately</option>
+          <option value="false">No – Keep as pending</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="modal-error" class="alert alert-danger" style="display:none;margin-top:.5rem"></div>
+
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+      <button class="btn btn-outline" onclick="closeScholarshipModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-submit-btn" onclick="submitScholarship()">
+        ➕ Add Scholarship
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Dialog -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div style="font-size:3rem;margin-bottom:1rem">🗑️</div>
+    <h3 style="margin-bottom:.5rem">Delete Scholarship?</h3>
+    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1.5rem" id="confirm-msg">This action cannot be undone.</p>
+    <div style="display:flex;gap:.75rem;justify-content:center">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-yes-btn">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+// ── Guard: admin only ──────────────────────────────────────
+if (!Auth.isLoggedIn() || !Auth.isAdmin()) {
+  window.location = '/pages/login.html';
+}
+
+let allScholarships = [], editingId = null, allUsers = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('admin-name-sidebar').textContent = Auth.getUser()?.name || 'Admin';
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // category checkbox toggle style
+  document.querySelectorAll('.cat-check-label input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      inp.parentElement.classList.toggle('checked', inp.checked);
+    });
+  });
+
+  await loadDashboard();
+});
+
+// ── Panel Switching ────────────────────────────────────────
+function showAdminPanel(name, linkEl) {
+  if (event) event.preventDefault();
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (linkEl) linkEl.classList.add('active');
+
+  const loaders = { scholarships: loadScholarships, pending: loadPending, notifications: loadNotifications, users: loadUsers, contacts: loadContacts };
+  if (loaders[name]) loaders[name]();
+}
+
+// ── Dashboard ──────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [analytics, topData] = await Promise.all([
+      API.get('/admin/analytics'),
+      API.get('/scholarships?sort=-views&limit=5', false)
+    ]);
+    const a = analytics.analytics;
+
+    document.getElementById('admin-stats').innerHTML = `
+      <div class="admin-stat"><div class="a-icon" style="background:#eff3fc;color:var(--primary)">🎓</div><div><div class="a-val">${a.scholarships.total}</div><div class="a-lbl">Total Scholarships</div></div></div>
+      <div class="admin-stat"><div class="a-icon" style="background:var(--success-light);color:var(--success)">✅</div><div><div class="a-val">${a.scholarships.active}</div><div class="a-lbl">Active Scholarships</div></div></div>
+      <div class="admin-stat"><div class="a-icon" style="background:var(--info-light);color:var(--info)">👥</div><div><div class="a-val">${a.users.total}</div><div class="a-lbl">Registered Students</div></div></div>
+      <div class="admin-stat"><div class="a-icon" style="background:var(--warning-light);color:var(--warning)">⏳</div><div><div class="a-val">${a.scholarships.pending}</div><div class="a-lbl">Pending Approval</div></div></div>`;
+
+    if (a.scholarships.pending > 0) document.getElementById('pending-dot').style.display = 'inline-block';
+
+    // Top scholarships
+    const top = topData.scholarships || [];
+    document.getElementById('top-scholarships').innerHTML = top.length
+      ? top.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.65rem 0;border-bottom:1px solid var(--border-light)">
+          <div>
+            <div style="font-weight:600;font-size:.875rem">${s.name.length>50?s.name.slice(0,50)+'…':s.name}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">${formatCurrency(s.amount)} · ${(s.category||[]).join(', ')}</div>
+          </div>
+          <div style="text-align:right;font-size:.8rem;color:var(--text-muted)">👁 ${s.views||0}</div>
+        </div>`).join('')
+      : '<p style="color:var(--text-muted);font-size:.875rem;text-align:center;padding:1rem">No data yet</p>';
+
+  } catch(e) { showToast('Error loading analytics: ' + e.message, 'error'); }
+}
+
+// ── Load Scholarships Table ────────────────────────────────
+async function loadScholarships() {
+  document.getElementById('sch-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    // Admin sees all (approved + not approved)
+    const data = await API.get('/scholarships?limit=100&sort=-createdAt');
+    allScholarships = data.scholarships || [];
+    renderScholarshipTable(allScholarships);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function renderScholarshipTable(list) {
+  const tbody = document.getElementById('sch-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">No scholarships found. <button class="btn btn-primary btn-sm" onclick="openScholarshipModal()">Add First Scholarship</button></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const expired = new Date(s.deadline) < new Date();
+    const days = Math.max(0, Math.ceil((new Date(s.deadline) - new Date()) / 86400000));
+    return `<tr>
+      <td class="td-name">${s.name}<span>${(s.category||[]).join(', ')} · ${s.gender !== 'All' ? s.gender : 'All'}</span></td>
+      <td>${(s.category||[]).map(c=>`<span class="badge ${getCategoryBadge(c)}" style="font-size:.65rem">${c}</span>`).join(' ')}</td>
+      <td><strong style="color:var(--success)">${formatCurrency(s.amount)}</strong></td>
+      <td>
+        <div style="font-size:.82rem">${formatDate(s.deadline)}</div>
+        <div style="font-size:.72rem;color:${expired?'var(--danger)':days<=14?'var(--warning)':'var(--text-muted)'}">${expired?'Expired':days+' days left'}</div>
+      </td>
+      <td>
+        ${s.isApproved ? '<span class="badge badge-active">✅ Active</span>' : '<span class="badge badge-expired">⏳ Pending</span>'}
+        ${s.isFeatured ? '<span class="badge badge-info" style="font-size:.65rem;margin-left:.3rem">⭐ Featured</span>' : ''}
+      </td>
+      <td>👁 ${s.views||0}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-outline" onclick="editScholarship('${s._id}')" title="Edit">✏️</button>
+          ${!s.isApproved ? `<button class="btn btn-sm btn-success" onclick="approveScholarship('${s._id}')" title="Approve">✅</button>` : ''}
+          <button class="btn btn-sm btn-danger" onclick="confirmDelete('${s._id}','${s.name.replace(/'/g,"\\'")}' )" title="Delete">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterScholarshipTable() {
+  const q = document.getElementById('sch-search').value.toLowerCase();
+  renderScholarshipTable(q ? allScholarships.filter(s => s.name.toLowerCase().includes(q) || (s.category||[]).join(' ').toLowerCase().includes(q)) : allScholarships);
+}
+
+// ── Add / Edit Modal ───────────────────────────────────────
+function openScholarshipModal(scholarship = null) {
+  editingId = scholarship ? scholarship._id : null;
+  const modal = document.getElementById('sch-modal');
+  const title = document.getElementById('modal-title');
+  const btn   = document.getElementById('modal-submit-btn');
+
+  // Reset all fields
+  document.getElementById('m-name').value        = '';
+  document.getElementById('m-gender').value      = 'All';
+  document.getElementById('m-amount').value      = '';
+  document.getElementById('m-minclass').value    = '1';
+  document.getElementById('m-maxclass').value    = '12';
+  document.getElementById('m-income').value      = '';
+  document.getElementById('m-percentage').value  = '';
+  document.getElementById('m-deadline').value    = '';
+  document.getElementById('m-state').value       = 'All India';
+  document.getElementById('m-link').value        = '';
+  document.getElementById('m-eligibility').value = '';
+  document.getElementById('m-description').value = '';
+  document.getElementById('m-benefits').value    = '';
+  document.getElementById('m-process').value     = '';
+  document.getElementById('m-docs').value        = '';
+  document.getElementById('m-featured').value    = 'false';
+  document.getElementById('m-approve').value     = 'true';
+  document.getElementById('modal-error').style.display = 'none';
+
+  // Uncheck all categories
+  document.querySelectorAll('#m-categories input').forEach(inp => { inp.checked = false; inp.parentElement.classList.remove('checked'); });
+
+  if (scholarship) {
+    title.textContent = '✏️ Edit Scholarship';
+    btn.textContent   = '💾 Save Changes';
+    document.getElementById('m-name').value        = scholarship.name || '';
+    document.getElementById('m-gender').value      = scholarship.gender || 'All';
+    document.getElementById('m-amount').value      = scholarship.amount || '';
+    document.getElementById('m-minclass').value    = scholarship.eligibilityCriteria?.minClass || '1';
+    document.getElementById('m-maxclass').value    = scholarship.eligibilityCriteria?.maxClass || '12';
+    document.getElementById('m-income').value      = scholarship.incomeLimit || '';
+    document.getElementById('m-percentage').value  = scholarship.eligibilityCriteria?.minPercentage || '';
+    document.getElementById('m-deadline').value    = scholarship.deadline ? scholarship.deadline.split('T')[0] : '';
+    document.getElementById('m-state').value       = (scholarship.state||['All India'])[0];
+    document.getElementById('m-link').value        = scholarship.officialLink || '';
+    document.getElementById('m-eligibility').value = scholarship.eligibility || '';
+    document.getElementById('m-description').value = scholarship.description || '';
+    document.getElementById('m-benefits').value    = scholarship.benefits || '';
+    document.getElementById('m-process').value     = scholarship.applicationProcess || '';
+    document.getElementById('m-docs').value        = (scholarship.documents||[]).join(', ');
+    document.getElementById('m-featured').value    = scholarship.isFeatured ? 'true' : 'false';
+    document.getElementById('m-approve').value     = scholarship.isApproved ? 'true' : 'false';
+
+    (scholarship.category||[]).forEach(cat => {
+      const inp = document.querySelector(`#m-categories input[value="${cat}"]`);
+      if (inp) { inp.checked = true; inp.parentElement.classList.add('checked'); }
+    });
+  } else {
+    title.textContent = '➕ Add New Scholarship';
+    btn.textContent   = '➕ Add Scholarship';
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeScholarshipModal() {
+  document.getElementById('sch-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+function editScholarship(id) {
+  const s = allScholarships.find(x => x._id === id);
+  if (s) openScholarshipModal(s);
+}
+
+async function submitScholarship() {
+  const errEl = document.getElementById('modal-error');
+  errEl.style.display = 'none';
+
+  const categories = [...document.querySelectorAll('#m-categories input:checked')].map(i => i.value);
+  const name       = document.getElementById('m-name').value.trim();
+  const amount     = parseInt(document.getElementById('m-amount').value);
+  const deadline   = document.getElementById('m-deadline').value;
+  const description= document.getElementById('m-description').value.trim();
+  const eligibility= document.getElementById('m-eligibility').value.trim();
+
+  if (!name)        { errEl.textContent='⚠️ Scholarship name is required.';  errEl.style.display='flex'; return; }
+  if (!categories.length) { errEl.textContent='⚠️ Select at least one category.'; errEl.style.display='flex'; return; }
+  if (!amount || amount <= 0) { errEl.textContent='⚠️ Enter a valid amount.'; errEl.style.display='flex'; return; }
+  if (!deadline)    { errEl.textContent='⚠️ Deadline is required.'; errEl.style.display='flex'; return; }
+  if (!description) { errEl.textContent='⚠️ Description is required.'; errEl.style.display='flex'; return; }
+  if (!eligibility) { errEl.textContent='⚠️ Eligibility criteria is required.'; errEl.style.display='flex'; return; }
+
+  const payload = {
+    name, category: categories,
+    gender:      document.getElementById('m-gender').value,
+    amount,
+    incomeLimit: parseInt(document.getElementById('m-income').value) || 0,
+    eligibility,
+    eligibilityCriteria: {
+      minClass:       parseInt(document.getElementById('m-minclass').value)    || 1,
+      maxClass:       parseInt(document.getElementById('m-maxclass').value)    || 12,
+      minPercentage:  parseInt(document.getElementById('m-percentage').value)  || 0,
+      maxFamilyIncome:parseInt(document.getElementById('m-income').value)      || 1000000
+    },
+    state:       [document.getElementById('m-state').value],
+    deadline,
+    officialLink:document.getElementById('m-link').value || '#',
+    description,
+    benefits:    document.getElementById('m-benefits').value,
+    applicationProcess: document.getElementById('m-process').value,
+    documents:   document.getElementById('m-docs').value.split(',').map(d=>d.trim()).filter(Boolean),
+    isFeatured:  document.getElementById('m-featured').value === 'true',
+    isApproved:  document.getElementById('m-approve').value  === 'true'
+  };
+
+  const btn = document.getElementById('modal-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    if (editingId) {
+      await API.put(`/scholarships/${editingId}`, payload);
+      showToast('Scholarship updated successfully!', 'success');
+    } else {
+      await API.post('/scholarships', payload);
+      showToast('Scholarship added successfully!', 'success');
+    }
+    closeScholarshipModal();
+    await loadScholarships();
+    await loadDashboard();
+  } catch(e) {
+    errEl.textContent = '⚠️ ' + e.message;
+    errEl.style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingId ? '💾 Save Changes' : '➕ Add Scholarship';
+  }
+}
+
+// ── Delete ─────────────────────────────────────────────────
+let deleteTarget = null;
+function confirmDelete(id, name) {
+  deleteTarget = id;
+  document.getElementById('confirm-msg').textContent = `Delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('confirm-yes-btn').onclick = async () => {
+    try {
+      await API.delete(`/scholarships/${deleteTarget}`);
+      showToast('Scholarship deleted.', 'success');
+      closeConfirm();
+      await loadScholarships();
+      await loadDashboard();
+    } catch(e) { showToast(e.message, 'error'); }
+  };
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  deleteTarget = null;
+}
+
+// ── Approve ────────────────────────────────────────────────
+async function approveScholarship(id) {
+  try {
+    await API.put(`/admin/scholarships/${id}/approve`, {});
+    showToast('Scholarship approved and published!', 'success');
+    await loadScholarships();
+    await loadDashboard();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ── Pending ────────────────────────────────────────────────
+async function loadPending() {
+  document.getElementById('pending-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    const data = await API.get('/scholarships?limit=100&sort=-createdAt');
+    const pending = (data.scholarships||[]).filter(s => !s.isApproved);
+    if (!pending.length) {
+      document.getElementById('pending-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:3rem;color:var(--text-muted)">✅ No pending scholarships</td></tr>';
+      return;
+    }
+    document.getElementById('pending-tbody').innerHTML = pending.map(s => `
+      <tr>
+        <td class="td-name">${s.name}<span>${(s.category||[]).join(', ')}</span></td>
+        <td>${(s.category||[]).map(c=>`<span class="badge ${getCategoryBadge(c)}" style="font-size:.65rem">${c}</span>`).join(' ')}</td>
+        <td><strong style="color:var(--success)">${formatCurrency(s.amount)}</strong></td>
+        <td style="font-size:.82rem">${formatDate(s.deadline)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-sm btn-success" onclick="approveScholarship('${s._id}')">✅ Approve</button>
+            <button class="btn btn-sm btn-outline" onclick="editScholarship('${s._id}');showAdminPanel('scholarships')">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="confirmDelete('${s._id}','${s.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ── Notifications ──────────────────────────────────────────
+async function loadNotifications() {
+  document.getElementById('notif-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    const data = await API.get('/notifications?limit=50');
+    const list = data.notifications || [];
+    if (!list.length) {
+      document.getElementById('notif-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">No notifications yet</td></tr>';
+      return;
+    }
+    const typeMap = { new_scholarship:'🆕 New Scholarship', deadline:'⚠️ Deadline', announcement:'📢 Announcement', update:'🔄 Update' };
+    const prioMap = { low:'badge-info', medium:'badge-active', high:'badge-merit', urgent:'badge-expired' };
+    document.getElementById('notif-tbody').innerHTML = list.map(n => `
+      <tr>
+        <td style="max-width:180px"><div style="font-weight:600;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n.title}</div></td>
+        <td><span class="badge badge-info" style="font-size:.7rem">${typeMap[n.type]||n.type}</span></td>
+        <td><span class="badge ${prioMap[n.priority]||'badge-info'}" style="font-size:.7rem">${n.priority}</span></td>
+        <td style="font-size:.8rem;color:var(--text-muted)">${formatDate(n.date)}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteNotification('${n._id}')">🗑️</button></td>
+      </tr>`).join('');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function postNotification() {
+  const title   = document.getElementById('n-title').value.trim();
+  const message = document.getElementById('n-message').value.trim();
+  if (!title || !message) { showToast('Title and message are required.', 'warning'); return; }
+  try {
+    await API.post('/notifications', {
+      title, message,
+      type:     document.getElementById('n-type').value,
+      priority: document.getElementById('n-priority').value
+    });
+    showToast('Notification posted!', 'success');
+    document.getElementById('n-title').value   = '';
+    document.getElementById('n-message').value = '';
+    await loadNotifications();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function deleteNotification(id) {
+  try {
+    await API.delete(`/notifications/${id}`);
+    showToast('Notification deleted.', 'info');
+    await loadNotifications();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ── Users ──────────────────────────────────────────────────
+async function loadUsers() {
+  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    const data = await API.get('/admin/users?limit=100');
+    allUsers = data.users || [];
+    renderUsersTable(allUsers);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">No users found</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><div style="font-weight:600;font-size:.875rem">${u.name}</div></td>
+      <td style="font-size:.82rem">${u.email}</td>
+      <td><span class="badge ${getCategoryBadge(u.profile?.category||'')}" style="font-size:.7rem">${u.profile?.category||'—'}</span></td>
+      <td style="font-size:.82rem">${u.profile?.class ? 'Class ' + u.profile.class : '—'}</td>
+      <td style="font-size:.82rem">${u.profile?.state||'—'}</td>
+      <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(u.createdAt)}</td>
+      <td>
+        <span class="badge ${u.isActive?'badge-active':'badge-expired'}" style="font-size:.7rem">${u.isActive?'Active':'Inactive'}</span>
+      </td>
+    </tr>`).join('');
+}
+
+function filterUsers(q) {
+  q = q.toLowerCase();
+  renderUsersTable(q ? allUsers.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) : allUsers);
+}
+
+// ── Contacts ───────────────────────────────────────────────
+async function loadContacts() {
+  document.getElementById('contacts-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    const data = await API.get('/contact');
+    const list = data.contacts || [];
+    if (!list.length) { document.getElementById('contacts-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">No messages yet</td></tr>'; return; }
+    const sMap = { unread:'badge-expired', read:'badge-info', replied:'badge-active' };
+    document.getElementById('contacts-tbody').innerHTML = list.map(c => `
+      <tr>
+        <td style="font-weight:600;font-size:.875rem">${c.name}</td>
+        <td style="font-size:.8rem">${c.email}</td>
+        <td style="font-size:.8rem">${c.subject||'General'}</td>
+        <td style="max-width:200px;font-size:.8rem;color:var(--text-secondary)">${c.message.length>80?c.message.slice(0,80)+'…':c.message}</td>
+        <td style="font-size:.78rem;color:var(--text-muted);white-space:nowrap">${formatDate(c.createdAt)}</td>
+        <td>
+          <span class="badge ${sMap[c.status]||'badge-info'}" style="font-size:.7rem">${c.status}</span>
+          ${c.status==='unread'?`<button class="btn btn-sm btn-outline" style="margin-top:.3rem;padding:.2rem .6rem;font-size:.7rem" onclick="markRead('${c._id}')">Mark Read</button>`:''}
+        </td>
+      </tr>`).join('');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function markRead(id) {
+  try { await API.put(`/contact/${id}`, { status:'read' }); await loadContacts(); } catch(e) { showToast(e.message, 'error'); }
+}
+
+// Close modal on outside click
+document.getElementById('sch-modal').addEventListener('click', function(e) { if (e.target === this) closeScholarshipModal(); });
+document.getElementById('confirm-overlay').addEventListener('click', function(e) { if (e.target === this) closeConfirm(); });
+</script>
+</body>
+</html>

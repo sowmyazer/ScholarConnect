@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholarships – ScholarConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .search-page { margin-top: 70px; padding: 2rem 0; min-height: 100vh; }
+    .search-layout { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start; }
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .results-count { font-size: .9rem; color: var(--text-muted); }
+    .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .sort-select { padding: .5rem .9rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-white); color: var(--text-primary); font-size: .875rem; cursor: pointer; }
+    .filter-section { margin-bottom: 1.5rem; }
+    .filter-section-title { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: .75rem; }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .filter-chip { padding: .35rem .85rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--bg-white); color: var(--text-secondary); font-size: .8rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .filter-chip.active, .filter-chip:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .search-input-wrap { display: flex; gap: .75rem; margin-bottom: 2rem; }
+    .search-input-wrap input { flex: 1; }
+    .active-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
+    .active-filter-tag { display: inline-flex; align-items: center; gap: .4rem; background: var(--primary); color: #fff; padding: .3rem .8rem; border-radius: 100px; font-size: .78rem; font-weight: 600; }
+    .active-filter-tag button { background: none; border: none; color: #fff; cursor: pointer; font-size: .9rem; line-height: 1; padding: 0; }
+    .range-input { width: 100%; accent-color: var(--primary); }
+    @media(max-width: 900px){ .search-layout { grid-template-columns: 1fr; } .filter-panel { position: static; } }
+    @media(max-width: 600px){ .results-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div id="page-loader" class="page-loader">
+  <div class="loader-spinner"></div>
+  <p style="color:var(--text-muted);font-size:.875rem">Loading…</p>
+</div>
+<div id="nav-overlay" class="nav-overlay"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-logo">
+        <div class="logo-icon">🎓</div>
+        <div class="logo-text">
+          <div class="logo-title">ScholarConnect</div>
+          <div class="logo-sub">Scholarship Portal</div>
+        </div>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/scholarships.html" class="active">Scholarships</a></li>
+        <li><a href="/pages/eligibility.html">Eligibility Checker</a></li>
+        <li><a href="/pages/documents.html">Documents Guide</a></li>
+        <li><a href="/pages/notifications.html">Notifications</a></li>
+        <li><a href="/pages/about.html">About</a></li>
+        <li><a href="/pages/contact.html">Contact</a></li>
+        <li id="nav-admin-link" class="hidden"><a href="/pages/admin.html">⚙️ Admin</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="/pages/login.html" id="nav-login-btn" class="btn btn-primary btn-sm">Login</a>
+        <div id="nav-user-menu" class="hidden" style="display:flex;align-items:center;gap:.75rem">
+          <a href="/pages/dashboard.html" class="btn btn-outline btn-sm">👤 <span id="nav-user-name">User</span></a>
+          <button onclick="logout()" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger)">Logout</button>
+        </div>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="search-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div style="margin-bottom:2rem">
+      <h1 style="font-size:2rem;margin-bottom:.5rem">Find Scholarships</h1>
+      <p>Search from <strong id="total-count">500+</strong> scholarships. Use filters to narrow down to the best matches.</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-input-wrap">
+      <div class="input-icon-wrap" style="flex:1">
+        <span class="input-icon">🔍</span>
+        <input type="text" id="search-input" class="form-control" placeholder="Search by scholarship name, category, eligibility…">
+      </div>
+      <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+      <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+    </div>
+
+    <!-- Active Filters -->
+    <div class="active-filters" id="active-filters"></div>
+
+    <div class="search-layout">
+      <!-- FILTER PANEL -->
+      <aside>
+        <div class="filter-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+            <span class="filter-title" style="margin:0">🔧 Filters</span>
+            <button onclick="resetFilters()" style="background:none;border:none;color:var(--primary);font-size:.8rem;cursor:pointer;font-weight:600">Clear All</button>
+          </div>
+
+          <!-- Category -->
+          <div class="filter-section">
+            <div class="filter-section-title">Category</div>
+            <div class="filter-chips" id="cat-filter">
+              <div class="filter-chip" data-value="SC">SC</div>
+              <div class="filter-chip" data-value="ST">ST</div>
+              <div class="filter-chip" data-value="BC">BC</div>
+              <div class="filter-chip" data-value="OBC">OBC</div>
+              <div class="filter-chip" data-value="Minority">Minority</div>
+              <div class="filter-chip" data-value="EWS">EWS</div>
+              <div class="filter-chip" data-value="Merit">Merit</div>
+              <div class="filter-chip" data-value="Girls">Girls</div>
+              <div class="filter-chip" data-value="General">General</div>
+            </div>
+          </div>
+
+          <!-- Gender -->
+          <div class="filter-section">
+            <div class="filter-section-title">Gender</div>
+            <div class="filter-chips" id="gender-filter">
+              <div class="filter-chip" data-value="All">All</div>
+              <div class="filter-chip" data-value="Male">Male</div>
+              <div class="filter-chip" data-value="Female">Female</div>
+            </div>
+          </div>
+
+          <!-- Class -->
+          <div class="filter-section">
+            <div class="filter-section-title">Class Level</div>
+            <div class="filter-chips" id="class-filter">
+              <div class="filter-chip" data-value="8">Class 8</div>
+              <div class="filter-chip" data-value="9">Class 9</div>
+              <div class="filter-chip" data-value="10">Class 10</div>
+              <div class="filter-chip" data-value="11">Class 11</div>
+              <div class="filter-chip" data-value="12">Class 12</div>
+            </div>
+          </div>
+
+          <!-- State -->
+          <div class="filter-section">
+            <div class="filter-section-title">State</div>
+            <select class="form-control" id="state-filter" style="font-size:.85rem">
+              <option value="">All States</option>
+              <option>Andhra Pradesh</option><option>Telangana</option>
+              <option>Tamil Nadu</option><option>Karnataka</option>
+              <option>Maharashtra</option><option>Kerala</option>
+              <option>Gujarat</option><option>Rajasthan</option>
+              <option>Uttar Pradesh</option><option>Bihar</option>
+              <option>West Bengal</option><option>Odisha</option>
+              <option>Madhya Pradesh</option><option>Punjab</option>
+              <option>Haryana</option><option>Delhi</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="filter-section">
+            <div class="filter-section-title">Status</div>
+            <div class="filter-chips" id="status-filter">
+              <div class="filter-chip active" data-value="active">Active</div>
+              <div class="filter-chip" data-value="all">All</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-full mt-2" onclick="applyFilters()">Apply Filters</button>
+        </div>
+      </aside>
+
+      <!-- RESULTS -->
+      <div>
+        <div class="results-header">
+          <div class="results-count" id="results-count">Loading scholarships…</div>
+          <select class="sort-select" id="sort-select" onchange="applyFilters()">
+            <option value="-createdAt">Newest First</option>
+            <option value="deadline">Deadline (Earliest)</option>
+            <option value="-amount">Amount (Highest)</option>
+            <option value="-views">Most Popular</option>
+          </select>
+        </div>
+
+        <div class="results-grid" id="results-grid">
+          <!-- Skeleton -->
+          <div class="skeleton" style="height:280px;border-radius:var(--radius)"></div>
+          <div class="skeleton" style="height:280px;border-radius:var(--radius)"></div>
+          <div class="skeleton" style="height:280px;border-radius:var(--radius)"></div>
+          <div class="skeleton" style="height:280px;border-radius:var(--radius)"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">
+      <div>© 2025 ScholarConnect</div>
+      <div><a href="/">Home</a> · <a href="/pages/about.html">About</a> · <a href="/pages/contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
+<script src="/js/scholarships.js">
+
+</script>
+</body>
+</html>

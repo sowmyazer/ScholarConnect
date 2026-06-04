@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact – ScholarConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .contact-page { margin-top:70px; padding:4rem 0; min-height:100vh; }
+    .contact-layout { display:grid; grid-template-columns:1fr 480px; gap:4rem; align-items:start; }
+    .contact-form-card { background:var(--bg-card); border-radius:var(--radius-lg); padding:2.5rem; border:1px solid var(--border-light); box-shadow:var(--shadow-card); }
+    .info-item { display:flex; gap:1.25rem; align-items:flex-start; margin-bottom:2rem; }
+    .info-icon { width:48px; height:48px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+    .info-text h4 { margin-bottom:.25rem; font-size:.95rem; }
+    .info-text p  { font-size:.875rem; }
+    .faq-item { background:var(--bg-card); border-radius:var(--radius-sm); border:1px solid var(--border-light); margin-bottom:.75rem; overflow:hidden; }
+    .faq-q { padding:1rem 1.25rem; font-weight:600; font-size:.9rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:var(--text-primary); }
+    .faq-a { padding:0 1.25rem; max-height:0; overflow:hidden; transition:all .3s; font-size:.875rem; color:var(--text-secondary); line-height:1.7; }
+    .faq-item.open .faq-a { max-height:200px; padding:0 1.25rem 1rem; }
+    .faq-item.open .faq-arrow { transform:rotate(180deg); }
+    .faq-arrow { transition:transform .3s; }
+    @media(max-width:900px){ .contact-layout{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<div id="page-loader" class="page-loader"><div class="loader-spinner"></div></div>
+<div id="nav-overlay" class="nav-overlay"></div>
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-logo">
+        <div class="logo-icon">🎓</div>
+        <div class="logo-text"><div class="logo-title">ScholarConnect</div><div class="logo-sub">Scholarship Portal</div></div>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/scholarships.html">Scholarships</a></li>
+        <li><a href="/pages/eligibility.html">Eligibility Checker</a></li>
+        <li><a href="/pages/documents.html">Documents Guide</a></li>
+        <li><a href="/pages/notifications.html">Notifications</a></li>
+        <li><a href="/pages/about.html">About</a></li>
+        <li><a href="/pages/contact.html" class="active">Contact</a></li>
+        <li id="nav-admin-link" class="hidden"><a href="/pages/admin.html">⚙️ Admin</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="/pages/login.html" id="nav-login-btn" class="btn btn-primary btn-sm">Login</a>
+        <div id="nav-user-menu" class="hidden" style="display:flex;align-items:center;gap:.75rem">
+          <a href="/pages/dashboard.html" class="btn btn-outline btn-sm">👤 <span id="nav-user-name">User</span></a>
+          <button onclick="logout()" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger)">Logout</button>
+        </div>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="contact-page">
+  <div class="container">
+    <div style="margin-bottom:3rem;text-align:center">
+      <h1 style="font-size:2.2rem;margin-bottom:.75rem">Get in Touch</h1>
+      <p style="max-width:520px;margin:0 auto;font-size:1rem">Have a question about scholarships or need help? We're here for you.</p>
+    </div>
+
+    <div class="contact-layout">
+      <!-- LEFT: Info -->
+      <div>
+        <div class="info-item animate-on-scroll">
+          <div class="info-icon">📧</div>
+          <div class="info-text">
+            <h4>Email Support</h4>
+            <p>support@scholarconnect.com<br><span style="color:var(--text-muted);font-size:.8rem">Response within 24 hours</span></p>
+          </div>
+        </div>
+        <div class="info-item animate-on-scroll">
+          <div class="info-icon">📞</div>
+          <div class="info-text">
+            <h4>Helpline</h4>
+            <p>1800-XXX-XXXX (Toll Free)<br><span style="color:var(--text-muted);font-size:.8rem">Monday–Saturday, 9AM–6PM</span></p>
+          </div>
+        </div>
+        <div class="info-item animate-on-scroll">
+          <div class="info-icon">🏛️</div>
+          <div class="info-text">
+            <h4>Office Address</h4>
+            <p>ScholarConnect Project Office<br>Government School District, Hyderabad<br>Telangana – 500001</p>
+          </div>
+        </div>
+        <div class="info-item animate-on-scroll">
+          <div class="info-icon">🌐</div>
+          <div class="info-text">
+            <h4>Official NSP Portal</h4>
+            <p><a href="https://scholarships.gov.in" target="_blank" style="color:var(--primary)">scholarships.gov.in ↗</a><br><span style="color:var(--text-muted);font-size:.8rem">For submitting applications directly</span></p>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <h3 style="margin-bottom:1.25rem;font-size:1.1rem">❓ Frequently Asked Questions</h3>
+        <div class="faq-item animate-on-scroll">
+          <div class="faq-q" onclick="toggleFaq(this)">How do I apply for a scholarship? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Use our Eligibility Checker to find matching scholarships, then click "Apply Now" to go to the official portal. Keep your documents ready before applying.</div>
+        </div>
+        <div class="faq-item animate-on-scroll">
+          <div class="faq-q" onclick="toggleFaq(this)">Is ScholarConnect free to use? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes, ScholarConnect is completely free for all students. We do not charge any fees for finding scholarships, checking eligibility, or using any feature on this platform.</div>
+        </div>
+        <div class="faq-item animate-on-scroll">
+          <div class="faq-q" onclick="toggleFaq(this)">What documents do I need? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Most scholarships require: Aadhaar Card, Income Certificate, Caste Certificate, Study Certificate, Bank Passbook, and Passport Photo. Visit our Documents Guide for full details.</div>
+        </div>
+        <div class="faq-item animate-on-scroll">
+          <div class="faq-q" onclick="toggleFaq(this)">Can I apply for multiple scholarships? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes, you can apply to multiple scholarships as long as you meet the eligibility criteria for each. However, some scholarships may have restrictions on holding multiple scholarships simultaneously.</div>
+        </div>
+        <div class="faq-item animate-on-scroll">
+          <div class="faq-q" onclick="toggleFaq(this)">My income certificate expired. What to do? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Income certificates are valid for 1 year. Visit your Tahsildar's office or MeeSeva/Jan Seva Kendra to get a fresh one. It usually takes 7–15 working days.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Form -->
+      <div>
+        <div class="contact-form-card">
+          <h3 style="margin-bottom:.5rem">Send Us a Message</h3>
+          <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1.75rem">Fill the form below and we'll get back to you soon</p>
+
+          <div id="form-success" class="alert alert-success" style="display:none">
+            ✅ Your message has been submitted! We'll get back to you within 24 hours.
+          </div>
+
+          <form id="contact-form" onsubmit="submitContact(event)">
+            <div class="form-group">
+              <label>Your Name *</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="c-name" class="form-control" placeholder="Full name" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email Address *</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon">📧</span>
+                <input type="email" id="c-email" class="form-control" placeholder="your@email.com" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <select id="c-subject" class="form-control">
+                <option>General Inquiry</option>
+                <option>Scholarship Not Found</option>
+                <option>Eligibility Issue</option>
+                <option>Document Help</option>
+                <option>Technical Problem</option>
+                <option>Report Incorrect Information</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Message *</label>
+              <textarea id="c-message" class="form-control" rows="5" placeholder="Describe your query or issue in detail…" required style="resize:vertical"></textarea>
+            </div>
+            <div id="contact-error" class="alert alert-danger" style="display:none"></div>
+            <button type="submit" id="contact-btn" class="btn btn-primary btn-lg w-full" style="justify-content:center">
+              📨 Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">
+      <div>© 2025 ScholarConnect</div>
+      <div><a href="/">Home</a> · <a href="/pages/about.html">About</a></div>
+    </div>
+  </div>
+</footer>
+<script src="/js/app.js"></script>
+<script>
+async function submitContact(e) {
+  e.preventDefault();
+  const btn = document.getElementById('contact-btn');
+  const errEl = document.getElementById('contact-error');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await API.post('/contact', {
+      name:    document.getElementById('c-name').value,
+      email:   document.getElementById('c-email').value,
+      subject: document.getElementById('c-subject').value,
+      message: document.getElementById('c-message').value
+    }, false);
+    document.getElementById('contact-form').style.display = 'none';
+    document.getElementById('form-success').style.display = 'flex';
+  } catch(err) {
+    errEl.textContent = '⚠️ ' + err.message;
+    errEl.style.display = 'flex';
+    btn.disabled = false; btn.textContent = '📨 Send Message';
+  }
+}
+function toggleFaq(el) {
+  const item = el.parentElement;
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>

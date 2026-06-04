@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents Guide – ScholarConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .docs-page { margin-top: 70px; padding: 3rem 0; min-height: 100vh; }
+    .doc-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-light); box-shadow: var(--shadow-card); overflow: hidden; transition: var(--transition); }
+    .doc-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .doc-card-header { padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-light); }
+    .doc-icon { width: 52px; height: 52px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+    .doc-card-body { padding: 1.5rem; }
+    .doc-section { margin-bottom: 1rem; }
+    .doc-section-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: .4rem; }
+    .doc-section p { font-size: .88rem; color: var(--text-secondary); line-height: 1.6; }
+    .doc-steps { list-style: none; counter-reset: doc-step; }
+    .doc-steps li { counter-increment: doc-step; display: flex; gap: .6rem; font-size: .85rem; color: var(--text-secondary); margin-bottom: .4rem; }
+    .doc-steps li::before { content: counter(doc-step); width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; flex-shrink: 0; margin-top: .1rem; }
+    .docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .important-notice { background: var(--warning-light); border: 1px solid #fde68a; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2.5rem; display: flex; gap: 1rem; }
+    .checklist-card { background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: var(--radius); padding: 2rem; color: #fff; margin-bottom: 2.5rem; }
+    .checklist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-top: 1.25rem; }
+    .checklist-item { display: flex; align-items: center; gap: .5rem; font-size: .88rem; }
+    @media(max-width: 900px){ .docs-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width: 600px){ .docs-grid { grid-template-columns: 1fr; } .checklist-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div id="page-loader" class="page-loader"><div class="loader-spinner"></div></div>
+<div id="nav-overlay" class="nav-overlay"></div>
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-logo">
+        <div class="logo-icon">🎓</div>
+        <div class="logo-text"><div class="logo-title">ScholarConnect</div><div class="logo-sub">Scholarship Portal</div></div>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/scholarships.html">Scholarships</a></li>
+        <li><a href="/pages/eligibility.html">Eligibility Checker</a></li>
+        <li><a href="/pages/documents.html" class="active">Documents Guide</a></li>
+        <li><a href="/pages/notifications.html">Notifications</a></li>
+        <li><a href="/pages/about.html">About</a></li>
+        <li><a href="/pages/contact.html">Contact</a></li>
+        <li id="nav-admin-link" class="hidden"><a href="/pages/admin.html">⚙️ Admin</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="/pages/login.html" id="nav-login-btn" class="btn btn-primary btn-sm">Login</a>
+        <div id="nav-user-menu" class="hidden" style="display:flex;align-items:center;gap:.75rem">
+          <a href="/pages/dashboard.html" class="btn btn-outline btn-sm">👤 <span id="nav-user-name">User</span></a>
+          <button onclick="logout()" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger)">Logout</button>
+        </div>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-page">
+  <div class="container">
+    <div style="margin-bottom:2rem">
+      <h1 style="font-size:2rem;margin-bottom:.5rem">📋 Documents Guide</h1>
+      <p>Complete guide to all documents required for scholarship applications. Know what to collect, where to get them, and how to use them.</p>
+    </div>
+
+    <!-- Important Notice -->
+    <div class="important-notice">
+      <span style="font-size:1.5rem;flex-shrink:0">⚠️</span>
+      <div>
+        <strong style="color:#92400e;display:block;margin-bottom:.3rem">Before You Apply</strong>
+        <p style="color:#92400e;font-size:.88rem;margin:0">Always keep 2–3 photocopies of each document. Ensure all documents are attested by a Gazetted Officer or School Principal where required. Check validity dates on income certificates (usually valid for 1 year).</p>
+      </div>
+    </div>
+
+    <!-- Complete Checklist -->
+    <div class="checklist-card">
+      <h3 style="color:#fff;font-size:1.3rem">📝 Complete Documents Checklist</h3>
+      <p style="color:rgba(255,255,255,.8);font-size:.875rem;margin-top:.3rem">Keep all these documents ready before applying to any scholarship</p>
+      <div class="checklist-grid">
+        <div class="checklist-item"><span>☑️</span> Aadhaar Card (self)</div>
+        <div class="checklist-item"><span>☑️</span> Income Certificate</div>
+        <div class="checklist-item"><span>☑️</span> Caste / Community Certificate</div>
+        <div class="checklist-item"><span>☑️</span> Study Certificate</div>
+        <div class="checklist-item"><span>☑️</span> Bonafide Certificate</div>
+        <div class="checklist-item"><span>☑️</span> Bank Passbook / Cancelled Cheque</div>
+        <div class="checklist-item"><span>☑️</span> Passport Size Photo (6 copies)</div>
+        <div class="checklist-item"><span>☑️</span> Previous Year Marks Card</div>
+        <div class="checklist-item"><span>☑️</span> Parent Aadhaar Card</div>
+        <div class="checklist-item"><span>☑️</span> School Fee Receipt</div>
+      </div>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="docs-grid">
+
+      <!-- Aadhaar Card -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#ede9fe;color:#7c3aed">🪪</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Aadhaar Card</h3>
+            <span class="badge badge-sc" style="font-size:.7rem">Required for ALL scholarships</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Identity proof and biometric verification. Used to link bank account for direct benefit transfer (DBT).</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>12-digit Aadhaar number, registered mobile number linked to Aadhaar, bank account must be seeded with Aadhaar.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Visit nearest Aadhaar Seva Kendra or Post Office</li>
+              <li>Carry original address and identity proof</li>
+              <li>Biometric enrollment takes 10 minutes</li>
+              <li>Card arrives by post in 90 days. Download at uidai.gov.in</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Income Certificate -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#dcfce7;color:#16a34a">💰</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Income Certificate</h3>
+            <span class="badge badge-active" style="font-size:.7rem">Valid for 1 year</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Proves family's annual income is within the scholarship's income limit. Most critical document for need-based scholarships.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Annual family income from all sources, names of earning members, certificate issued by Tahsildar / MRO.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Visit Tahsildar / MRO office or Mee-Seva / Jan Seva Kendra</li>
+              <li>Fill application form with family income details</li>
+              <li>Attach salary slips / agriculture details</li>
+              <li>Collect certificate within 7–15 working days</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caste Certificate -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#e0f2fe;color:#0369a1">📜</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Caste Certificate</h3>
+            <span class="badge badge-st" style="font-size:.7rem">SC / ST / BC / OBC</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Proves belonging to Scheduled Caste, Scheduled Tribe, or Backward Class community for category-specific scholarships.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Caste name, community certificate number, date of issue. Issued by competent authority (Tahsildar).</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Apply at Tahsildar's office with ration card and school records</li>
+              <li>Or apply online at state MeeSeva / eSeva portal</li>
+              <li>Submit caste declaration form</li>
+              <li>Certificate issued within 15 days</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Study Certificate -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#fef3c7;color:#d97706">🏫</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Study Certificate</h3>
+            <span class="badge badge-merit" style="font-size:.7rem">From School Principal</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Confirms the student is currently enrolled in school. Most scholarships require this to be issued for the current academic year.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Student name, class, roll number, academic year, school name and DISE code, principal's signature & seal.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Request from your School Principal or Headmaster</li>
+              <li>Usually provided free of cost within 1–2 days</li>
+              <li>Must have current academic year mentioned</li>
+              <li>Should have school seal and principal signature</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bonafide Certificate -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#fce7f3;color:#db2777">🏅</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Bonafide Certificate</h3>
+            <span class="badge badge-girls" style="font-size:.7rem">For Higher Education</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Official proof from institution confirming student's bona fide enrollment. Often needed for higher education and college scholarships.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Student name, course, enrollment number, academic year, institution letterhead with authorized signature.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Apply in writing to school/college administration</li>
+              <li>May require nominal fee at some institutions</li>
+              <li>Issued within 3–5 working days</li>
+              <li>Valid for 6 months from date of issue</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Passbook -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#ccfbf1;color:#0f766e">🏦</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Bank Passbook</h3>
+            <span class="badge badge-bc" style="font-size:.7rem">For DBT Transfer</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Bank account details for Direct Benefit Transfer (DBT) of scholarship amount. Account must be in student's own name.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Account holder name, account number, IFSC code, bank name and branch, Aadhaar-linked status (mandatory).</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Open account at any nationalized bank (SBI, PNB, etc.) or Post Office</li>
+              <li>Zero-balance accounts available for students under PMJDY</li>
+              <li>Link Aadhaar to bank account (mandatory for DBT)</li>
+              <li>Get front page photocopy showing IFSC and account number</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passport Photo -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#f0fdf4;color:#15803d">📷</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Passport Size Photo</h3>
+            <span class="badge badge-active" style="font-size:.7rem">Recent (3 months)</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Identity verification on application form. Recent photos (within 3 months) must be used.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>White background, clear face photo, size 3.5cm × 4.5cm, minimum 6 copies recommended. School uniform preferred.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Visit local photo studio</li>
+              <li>Costs approximately ₹30–₹60 for 12 copies</div>
+              <li>Wear school uniform for official applications</li>
+              <li>Ensure white or light background as specified</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marks Card -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#eff3fc;color:var(--primary)">📊</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">Previous Year Marks Card</h3>
+            <span class="badge badge-info" style="font-size:.7rem">For Merit Scholarships</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Shows academic performance for merit-based and renewal of scholarships. Required for NMMS and INSPIRE scholarships.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Student name, marks in all subjects, total marks and percentage, class and school details, board/examination details.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Available from school/board after results declared</li>
+              <li>For State Board: collect from school or download online</li>
+              <li>Get attested photocopy for applications</li>
+              <li>Keep original safe, use photocopies for submissions</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- EWS Certificate -->
+      <div class="doc-card animate-on-scroll">
+        <div class="doc-card-header">
+          <div class="doc-icon" style="background:#fce7f3;color:#be185d">📃</div>
+          <div>
+            <h3 style="font-size:1rem;margin-bottom:.2rem">EWS Certificate</h3>
+            <span class="badge badge-ews" style="font-size:.7rem">Economically Weaker Section</span>
+          </div>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-section">
+            <div class="doc-section-title">📌 Purpose</div>
+            <p>Certifies that a General category student belongs to the Economically Weaker Section (income below ₹8 lakh per year).</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">📋 Required Information</div>
+            <p>Family's annual income (all sources), family assets declaration, no property above specified limits, General category affirmation.</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-section-title">🏢 How to Obtain</div>
+            <ol class="doc-steps">
+              <li>Apply at Tahsildar or Sub-Divisional Magistrate's office</li>
+              <li>Submit Form I with supporting documents</li>
+              <li>Income proof, property documents required</li>
+              <li>Valid for 1 year from issue date</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tips Section -->
+    <div style="margin-top:3rem;background:var(--bg-white);border-radius:var(--radius-lg);padding:2.5rem;border:1px solid var(--border-light)">
+      <h2 style="margin-bottom:1.5rem;font-size:1.5rem">💡 Pro Tips for Document Preparation</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+        <div style="padding:1.25rem;background:var(--success-light);border-radius:var(--radius-sm)">
+          <div style="font-size:1.5rem;margin-bottom:.6rem">📁</div>
+          <h4 style="color:#166534;margin-bottom:.4rem">Create a Document Folder</h4>
+          <p style="font-size:.85rem;color:#166534">Keep a physical folder with 3 copies of each document. Label each clearly. This saves time when applying to multiple scholarships.</p>
+        </div>
+        <div style="padding:1.25rem;background:var(--info-light);border-radius:var(--radius-sm)">
+          <div style="font-size:1.5rem;margin-bottom:.6rem">📱</div>
+          <h4 style="color:#075985;margin-bottom:.4rem">Digitize Your Documents</h4>
+          <p style="font-size:.85rem;color:#075985">Scan or photograph all documents at 300 DPI. Save as PDF. Keep a Google Drive/DigiLocker backup for online applications.</p>
+        </div>
+        <div style="padding:1.25rem;background:var(--warning-light);border-radius:var(--radius-sm)">
+          <div style="font-size:1.5rem;margin-bottom:.6rem">⏰</div>
+          <h4 style="color:#92400e;margin-bottom:.4rem">Check Validity Dates</h4>
+          <p style="font-size:.85rem;color:#92400e">Income certificate valid 1 year. EWS certificate 1 year. Caste certificate permanent. Check before each application season.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">
+      <div>© 2025 ScholarConnect</div>
+      <div><a href="/">Home</a> · <a href="/pages/scholarships.html">Scholarships</a> · <a href="/pages/contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications – ScholarConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .notifs-page { margin-top:70px; padding:3rem 0; min-height:100vh; }
+    .notifs-layout { display:grid; grid-template-columns:1fr 320px; gap:2rem; align-items:start; }
+    .notif-card { background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border-light); padding:1.25rem 1.5rem; margin-bottom:1rem; display:flex; gap:1rem; align-items:flex-start; transition:var(--transition); cursor:pointer; border-left:4px solid var(--border); }
+    .notif-card:hover { box-shadow:var(--shadow); border-left-color:var(--primary); }
+    .notif-card.new_scholarship { border-left-color:var(--success); }
+    .notif-card.deadline        { border-left-color:var(--danger);  }
+    .notif-card.announcement    { border-left-color:var(--primary); }
+    .notif-card.update          { border-left-color:var(--info);    }
+    .notif-card.urgent          { border-left-color:var(--danger); background:var(--danger-light); }
+    .notif-ico { font-size:1.5rem; flex-shrink:0; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; }
+    .notif-body { flex:1; }
+    .notif-body h4 { font-size:.95rem; margin-bottom:.3rem; color:var(--text-primary); }
+    .notif-body p  { font-size:.85rem; color:var(--text-secondary); margin-bottom:.4rem; }
+    .notif-meta { font-size:.75rem; color:var(--text-muted); }
+    .deadline-card { background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border-light); padding:1.25rem; margin-bottom:1rem; }
+    .deadline-card.urgent { border-color:#fca5a5; background:#fff5f5; }
+    .deadline-card h4 { font-size:.9rem; margin-bottom:.3rem; }
+    .deadline-card .days-left { font-size:1.5rem; font-weight:700; }
+    .deadline-card .days-left.urgent { color:var(--danger); }
+    .deadline-card .days-left.normal { color:var(--warning); }
+    .tab-strip { display:flex; gap:.25rem; background:var(--bg); border-radius:var(--radius-sm); padding:.25rem; margin-bottom:1.5rem; }
+    .tab-strip .tab { flex:1; padding:.5rem; text-align:center; border-radius:6px; border:none; background:transparent; font-size:.85rem; font-weight:600; cursor:pointer; color:var(--text-muted); transition:var(--transition); }
+    .tab-strip .tab.active { background:var(--bg-white); color:var(--primary); box-shadow:var(--shadow-sm); }
+    @media(max-width:800px){ .notifs-layout{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<div id="page-loader" class="page-loader"><div class="loader-spinner"></div></div>
+<div id="nav-overlay" class="nav-overlay"></div>
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-logo">
+        <div class="logo-icon">🎓</div>
+        <div class="logo-text"><div class="logo-title">ScholarConnect</div><div class="logo-sub">Scholarship Portal</div></div>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/scholarships.html">Scholarships</a></li>
+        <li><a href="/pages/eligibility.html">Eligibility Checker</a></li>
+        <li><a href="/pages/documents.html">Documents Guide</a></li>
+        <li><a href="/pages/notifications.html" class="active">Notifications</a></li>
+        <li><a href="/pages/about.html">About</a></li>
+        <li><a href="/pages/contact.html">Contact</a></li>
+        <li id="nav-admin-link" class="hidden"><a href="/pages/admin.html">⚙️ Admin</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="/pages/login.html" id="nav-login-btn" class="btn btn-primary btn-sm">Login</a>
+        <div id="nav-user-menu" class="hidden" style="display:flex;align-items:center;gap:.75rem">
+          <a href="/pages/dashboard.html" class="btn btn-outline btn-sm">👤 <span id="nav-user-name">User</span></a>
+          <button onclick="logout()" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger)">Logout</button>
+        </div>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="notifs-page">
+  <div class="container">
+    <div style="margin-bottom:2rem">
+      <h1 style="font-size:2rem;margin-bottom:.5rem">🔔 Notifications</h1>
+      <p>Stay updated with the latest scholarship announcements, upcoming deadlines, and government notices.</p>
+    </div>
+
+    <div class="notifs-layout">
+      <!-- LEFT: Notifications -->
+      <div>
+        <div class="tab-strip">
+          <button class="tab active" onclick="filterNotifs('all',this)">All</button>
+          <button class="tab" onclick="filterNotifs('new_scholarship',this)">🆕 New</button>
+          <button class="tab" onclick="filterNotifs('deadline',this)">⚠️ Deadlines</button>
+          <button class="tab" onclick="filterNotifs('announcement',this)">📢 Announcements</button>
+        </div>
+
+        <div id="notifs-list">
+          <div class="skeleton" style="height:80px;border-radius:var(--radius-sm);margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:80px;border-radius:var(--radius-sm);margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:80px;border-radius:var(--radius-sm);margin-bottom:1rem"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Deadline Alerts -->
+      <div>
+        <div style="background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border-light);padding:1.5rem;position:sticky;top:90px">
+          <h3 style="font-size:1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem">⏰ Upcoming Deadlines</h3>
+          <div id="deadlines-list">
+            <div class="skeleton" style="height:80px;border-radius:var(--radius-sm);margin-bottom:.75rem"></div>
+            <div class="skeleton" style="height:80px;border-radius:var(--radius-sm)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">
+      <div>© 2025 ScholarConnect</div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
+<script>
+let allNotifs = [];
+const typeMap  = { new_scholarship:'🆕', deadline:'⚠️', announcement:'📢', update:'🔄' };
+const colorMap = { new_scholarship:'#dcfce7', deadline:'#fee2e2', announcement:'#eff3fc', update:'#e0f2fe' };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const [notifData, scholarData] = await Promise.all([
+      API.get('/notifications?limit=50', false),
+      API.get('/scholarships?active=true&sort=deadline&limit=10', false)
+    ]);
+
+    allNotifs = notifData.notifications || [];
+    renderNotifs(allNotifs);
+
+    // Deadlines
+    const deadlines = scholarData.scholarships || [];
+    const dList = document.getElementById('deadlines-list');
+    if (deadlines.length) {
+      dList.innerHTML = deadlines.slice(0,8).map(s => {
+        const days = Math.max(0, Math.ceil((new Date(s.deadline)-new Date())/86400000));
+        const urgent = days <= 14;
+        return `
+        <div class="deadline-card ${urgent?'urgent':''}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+            <div>
+              <h4>${s.name.length>45?s.name.substring(0,45)+'…':s.name}</h4>
+              <div style="font-size:.78rem;color:var(--text-muted)">📅 ${formatDate(s.deadline)}</div>
+            </div>
+            <div class="days-left ${urgent?'urgent':'normal'}">${days}d</div>
+          </div>
+          <a href="/pages/scholarship-details.html?id=${s._id}" class="btn btn-sm btn-outline" style="margin-top:.75rem;width:100%;justify-content:center">View Details</a>
+        </div>`;
+      }).join('');
+    } else {
+      dList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;text-align:center;padding:1rem">No upcoming deadlines</p>';
+    }
+  } catch(e) {
+    document.getElementById('notifs-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Could not load notifications</h3></div>`;
+  }
+});
+
+function renderNotifs(notifs) {
+  const list = document.getElementById('notifs-list');
+  if (!notifs.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><h3>No notifications</h3><p>Check back later for updates</p></div>`;
+    return;
+  }
+  list.innerHTML = notifs.map(n => `
+    <div class="notif-card ${n.type} ${n.priority==='urgent'?'urgent':''}">
+      <div class="notif-ico" style="background:${colorMap[n.type]||'var(--bg)'}">
+        ${typeMap[n.type]||'🔔'}
+      </div>
+      <div class="notif-body">
+        <h4>${n.title}</h4>
+        <p>${n.message}</p>
+        <div class="notif-meta">
+          ${n.priority==='urgent'?'<span class="badge badge-expired" style="font-size:.68rem;margin-right:.5rem">URGENT</span>':''}
+          ${formatDate(n.date)}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterNotifs(type, btn) {
+  document.querySelectorAll('.tab-strip .tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'all') renderNotifs(allNotifs);
+  else renderNotifs(allNotifs.filter(n => n.type === type));
+}
+</script>
+</body>
+</html>
